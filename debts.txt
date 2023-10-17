@@ -1,0 +1,26 @@
+[
+  {
+    "name": "John",
+    "amount": 50
+  },
+  {
+    "name": "Alice",
+    "amount": 30
+  },
+  {
+    "name": "Jeff",
+    "amount": 500
+  },
+  {
+    "name": "AJ",
+    "amount": 20
+  },
+  {
+    "name": "Jez",
+    "amount": 99
+  },
+  {
+    "name": "",
+    "amount": null
+  }
+]
