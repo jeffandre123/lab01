@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as readlineSync from 'readline-sync'
 
 const file = './debts.txt'
-
+// hi
 interface Debt {
   name: string
   amount: number
