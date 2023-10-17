@@ -2,92 +2,66 @@ import * as fs from 'fs'
 import * as readlineSync from 'readline-sync'
 
 const file = './debts.txt'
-// hi
+
 interface Debt {
   name: string
   amount: number
 }
 
-type CallbackFunction = (err: NodeJS.ErrnoException | null) => void
-
-function readFileAsync (callback: CallbackFunction): void {
-  fs.readFile(file, 'utf-8', (err, readTheFile) => {
-    if (err) {
-      callback(err)
-    } else {
-      callback(null)
-      console.log(readTheFile)
-    }
-  })
+function readFileAsync (
+  callback: (err: NodeJS.ErrnoException | null, data?: string) => void
+): void {
+  fs.readFile(file, 'utf-8', callback)
 }
 
-function appendDebt (callback: CallbackFunction): void {
+function appendDebt (
+  callback: (err: NodeJS.ErrnoException | null) => void
+): void {
+  const name = readlineSync.question('Enter the name: ')
+  const amount = parseFloat(readlineSync.question('Enter the amount: '))
+
   try {
-    const name = readlineSync.question('Enter the name: ')
-    const amount = parseFloat(readlineSync.question('Enter the amount: '))
+    const existingDebts = fs.readFileSync(file, 'utf-8')
+    const debts: Debt[] = JSON.parse(existingDebts)
 
-    fs.readFile(file, 'utf-8', (readErr, existingDebts) => {
-      if (readErr) {
-        callback(readErr)
-      } else {
-        try {
-          const debts: Debt[] = JSON.parse(existingDebts)
+    debts.push({ name, amount })
 
-          debts.push({ name, amount })
-
-          fs.writeFile(
-            file,
-            JSON.stringify(debts, null, 2),
-            'utf-8',
-            writeErr => {
-              if (writeErr) {
-                callback(writeErr)
-              } else {
-                console.log('Debt added successfully.')
-                callback(null)
-              }
-            }
-          )
-        } catch (parseErr) {
-          console.error('Error parsing debts:', parseErr)
-          callback(parseErr as NodeJS.ErrnoException)
-        }
-      }
-    })
+    fs.writeFileSync(file, JSON.stringify(debts, null, 2), 'utf-8')
+    console.log('Debt added successfully.')
+    callback(null)
   } catch (err) {
     console.error('Error appending debt:', err)
     callback(err as NodeJS.ErrnoException)
   }
 }
 
-function listDebts (callback: CallbackFunction): void {
-  fs.readFile(file, 'utf-8', (err, existingDebts) => {
-    if (err) {
-      callback(err)
-    } else {
-      try {
-        const debts: Debt[] = JSON.parse(existingDebts)
+function listDebts (
+  callback: (err: NodeJS.ErrnoException | null) => void
+): void {
+  try {
+    const existingDebts = fs.readFileSync(file, 'utf-8')
+    const debts: Debt[] = JSON.parse(existingDebts)
 
-        console.log('List of Debts:')
-        debts.forEach(debt => {
-          console.log(`${debt.name}: $${debt.amount}`)
-        })
+    console.log('List of Debts:')
+    debts.forEach(debt => {
+      console.log(`${debt.name}: $${debt.amount}`)
+    })
 
-        callback(null)
-      } catch (parseErr) {
-        console.error('Error parsing debts:', parseErr)
-        callback(parseErr as NodeJS.ErrnoException)
-      }
-    }
-  })
+    callback(null)
+  } catch (err) {
+    console.error('Error listing debts:', err)
+    callback(err as NodeJS.ErrnoException)
+  }
 }
 
 const [command] = process.argv.slice(2)
 
 if (command === 'read') {
-  readFileAsync(err => {
+  readFileAsync((err, data) => {
     if (err) {
       console.error('Error reading file:', err)
+    } else {
+      console.log(data)
     }
   })
 } else if (command === 'add') {
